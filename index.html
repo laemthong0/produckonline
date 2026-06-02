@@ -1000,6 +1000,70 @@
       text-align: center;
     }
 
+    .receipt-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .receipt-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: 0 18px 44px rgba(25, 45, 31, .08);
+    }
+
+    .receipt-head {
+      padding: 22px;
+      background: linear-gradient(135deg, #0f8a3b, #086b2d);
+      color: #fff;
+      text-align: center;
+    }
+
+    .receipt-head h3 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .receipt-head p {
+      margin: 6px 0 0;
+      color: rgba(255, 255, 255, .86);
+    }
+
+    .receipt-body {
+      padding: 18px 22px 22px;
+    }
+
+    .receipt-row {
+      display: grid;
+      grid-template-columns: 150px 1fr;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #edf3ef;
+      color: var(--muted);
+    }
+
+    .receipt-row strong {
+      color: var(--text);
+      overflow-wrap: anywhere;
+      text-align: right;
+    }
+
+    .receipt-row.total strong {
+      color: var(--green-dark);
+      font-size: 22px;
+    }
+
+    .receipt-note {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #fff3f2;
+      color: var(--red);
+      font-weight: 700;
+      text-align: center;
+    }
+
     @media (max-width: 720px) {
       .app-header {
         gap: 12px;
@@ -1182,6 +1246,16 @@
             <button class="primary-btn" id="finishOrder" type="button">เสร็จสิ้น</button>
           </div>
         </section>
+
+        <section class="screen" data-screen="4">
+          <div class="receipt-wrap">
+            <div class="receipt-card" id="receiptPreview"></div>
+            <div class="actions">
+              <button class="secondary-btn" id="downloadReceipt" type="button">ดาวน์โหลดหลักฐานอีกครั้ง</button>
+              <button class="primary-btn" id="closeReceipt" type="button">ปิด</button>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   </div>
@@ -1205,7 +1279,8 @@
       step: 1,
       gps: "",
       orderCount: 0,
-      productLinkMode: false
+      productLinkMode: false,
+      lastReceiptOrder: null
     };
 
     const grid = document.getElementById("productGrid");
@@ -1475,6 +1550,10 @@
         const itemStep = Number(item.dataset.stepLabel);
         item.classList.toggle("active", itemStep === step);
         item.classList.toggle("done", itemStep < step);
+        if (step === 4) {
+          item.classList.remove("active");
+          item.classList.add("done");
+        }
       });
       if (step === 3) renderConfirm();
     }
@@ -1568,6 +1647,117 @@
       });
     }
 
+    function receiptRows(order) {
+      return [
+        ["เลขออเดอร์", order.orderId],
+        ["วันที่", new Date(order.createdAt).toLocaleString("th-TH")],
+        ["ชื่อผู้รับ", order.name],
+        ["เบอร์โทร", order.phone],
+        ["สินค้า", order.productName],
+        ["หมวด", order.category],
+        ["จำนวน", `${order.quantity} กระสอบ`],
+        ["ราคาต่อกระสอบ", money(order.productPrice)],
+        ["ราคารวม", money(order.subtotal)],
+        ...(order.discount > 0 ? [["ส่วนลด", `-${money(order.discount)}`]] : []),
+        ["ยอดชำระ", money(order.total)],
+        ["GPS", order.gps],
+        ["ตำแหน่ง", order.mapUrl]
+      ];
+    }
+
+    function renderReceipt(order) {
+      document.getElementById("receiptPreview").innerHTML = `
+        <div class="receipt-head">
+          <h3>หลักฐานการสั่งซื้อ</h3>
+          <p>แหลมทองกิจเกษตร</p>
+        </div>
+        <div class="receipt-body">
+          ${receiptRows(order).map(([label, value]) => `
+            <div class="receipt-row ${label === "ยอดชำระ" ? "total" : ""}">
+              <span>${escapeHtml(label)}</span>
+              <strong>${escapeHtml(value)}</strong>
+            </div>
+          `).join("")}
+          <div class="receipt-note">หมายเหตุ: ยอดชำระนี้ยังไม่รวมค่าจัดส่ง</div>
+        </div>
+      `;
+    }
+
+    function wrapCanvasText(context, text, x, y, maxWidth, lineHeight) {
+      const rawText = String(text);
+      const words = rawText.includes(" ") ? rawText.split(" ") : rawText.split("");
+      let line = "";
+      let currentY = y;
+      words.forEach((word) => {
+        const separator = rawText.includes(" ") ? " " : "";
+        const testLine = line ? `${line}${separator}${word}` : word;
+        if (context.measureText(testLine).width > maxWidth && line) {
+          context.fillText(line, x, currentY);
+          line = word;
+          currentY += lineHeight;
+        } else {
+          line = testLine;
+        }
+      });
+      context.fillText(line, x, currentY);
+      return currentY;
+    }
+
+    function createReceiptCanvas(order) {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1080;
+      canvas.height = 1500;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#0f8a3b";
+      ctx.fillRect(0, 0, canvas.width, 230);
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "700 58px Tahoma, Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("หลักฐานการสั่งซื้อ", canvas.width / 2, 92);
+      ctx.font = "700 38px Tahoma, Arial, sans-serif";
+      ctx.fillText("แหลมทองกิจเกษตร", canvas.width / 2, 152);
+      ctx.font = "400 28px Tahoma, Arial, sans-serif";
+      ctx.fillText("กรุณาเก็บภาพนี้ไว้เป็นหลักฐาน", canvas.width / 2, 198);
+
+      ctx.textAlign = "left";
+      let y = 300;
+      receiptRows(order).forEach(([label, value]) => {
+        ctx.fillStyle = "#64736a";
+        ctx.font = "400 30px Tahoma, Arial, sans-serif";
+        ctx.fillText(label, 76, y);
+        ctx.fillStyle = label === "ยอดชำระ" ? "#086b2d" : "#15221a";
+        ctx.font = label === "ยอดชำระ" ? "700 38px Tahoma, Arial, sans-serif" : "700 30px Tahoma, Arial, sans-serif";
+        const finalY = wrapCanvasText(ctx, value, 360, y, 640, 40);
+        ctx.strokeStyle = "#e4ece7";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(76, finalY + 24);
+        ctx.lineTo(1004, finalY + 24);
+        ctx.stroke();
+        y = finalY + 66;
+      });
+
+      ctx.fillStyle = "#fff3f2";
+      ctx.fillRect(76, y + 18, 928, 92);
+      ctx.fillStyle = "#d92d20";
+      ctx.font = "700 34px Tahoma, Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText("หมายเหตุ: ยอดชำระนี้ยังไม่รวมค่าจัดส่ง", canvas.width / 2, y + 76);
+      return canvas;
+    }
+
+    function downloadReceiptImage(order) {
+      const canvas = createReceiptCanvas(order);
+      const link = document.createElement("a");
+      link.download = `หลักฐานสั่งซื้อ-${order.orderId}.png`;
+      link.href = canvas.toDataURL("image/png");
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
     function requestCurrentLocation() {
       const gpsText = document.getElementById("gpsText");
       gpsText.textContent = "กำลังขอตำแหน่ง...";
@@ -1610,15 +1800,14 @@
       button.disabled = true;
       button.textContent = "กำลังส่งคำสั่งซื้อ...";
       try {
-        await sendOrderToBackend(getOrderData());
+        const order = getOrderData();
+        await sendOrderToBackend(order);
+        state.lastReceiptOrder = order;
         state.orderCount += 1;
         document.getElementById("cartCount").textContent = state.orderCount;
-        alert("ส่งคำสั่งซื้อเรียบร้อยแล้ว");
-        if (state.productLinkMode) {
-          modal.classList.remove("open");
-        } else {
-          closeOrder();
-        }
+        renderReceipt(order);
+        showStep(4);
+        downloadReceiptImage(order);
       } catch (error) {
         alert(error.message || "ส่งคำสั่งซื้อไม่สำเร็จ");
       } finally {
@@ -1627,6 +1816,16 @@
       }
     });
     document.getElementById("closeModal").addEventListener("click", closeOrder);
+    document.getElementById("downloadReceipt").addEventListener("click", () => {
+      if (state.lastReceiptOrder) downloadReceiptImage(state.lastReceiptOrder);
+    });
+    document.getElementById("closeReceipt").addEventListener("click", () => {
+      if (state.productLinkMode) {
+        modal.classList.remove("open");
+      } else {
+        closeOrder();
+      }
+    });
     modal.addEventListener("click", (event) => {
       if (event.target === modal) closeOrder();
     });
