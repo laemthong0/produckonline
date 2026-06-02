@@ -1,0 +1,1641 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>สั่งปุ๋ยสูตร</title>
+  <link rel="icon" href="favicon.ico">
+  <style>
+    :root {
+      --green: #087a2f;
+      --green-dark: #055f25;
+      --amber: #f28b00;
+      --red: #d93025;
+      --text: #17221b;
+      --muted: #64706a;
+      --line: #dfe7e2;
+      --soft: #f6faf7;
+      --white: #ffffff;
+      --shadow: 0 18px 55px rgba(20, 35, 24, .18);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Tahoma, "Noto Sans Thai", Arial, sans-serif;
+      color: var(--text);
+      background: #f8fbf8;
+      letter-spacing: 0;
+    }
+
+    button, input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+    }
+
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px clamp(16px, 3vw, 44px);
+      background: rgba(255, 255, 255, .94);
+      border-bottom: 1px solid var(--line);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      color: #fff;
+      background: var(--green);
+      font-size: 22px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(25px, 4vw, 38px);
+      line-height: 1;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .cart-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 10px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    main {
+      padding: 18px clamp(14px, 3vw, 44px) 48px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: 180px minmax(160px, 1fr) 170px;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .menu-btn, .select-btn, .search-box {
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .menu-btn {
+      background: var(--green);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    select.menu-btn {
+      padding: 0 14px;
+      appearance: none;
+    }
+
+    .select-btn {
+      padding: 0 14px;
+      text-align: left;
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 0 16px;
+      outline: none;
+    }
+
+    .status-box {
+      margin: -6px 0 18px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .status-box.error-state {
+      border-color: #f1c5c0;
+      background: #fff7f6;
+      color: var(--red);
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(160px, 1fr));
+      gap: 18px;
+    }
+
+    .product-card {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow: 0 10px 22px rgba(17, 40, 24, .05);
+      transition: transform .16s ease, border-color .16s ease, box-shadow .16s ease;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(8, 122, 47, .45);
+      box-shadow: 0 16px 30px rgba(17, 40, 24, .10);
+    }
+
+    .product-image-btn {
+      display: block;
+      width: 100%;
+      padding: 0;
+      background: #fff;
+    }
+
+    .product-card img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 4 / 4.4;
+      object-fit: contain;
+      padding: 14px 14px 8px;
+      background: linear-gradient(#fff, #fbfdfb);
+    }
+
+    .product-info {
+      padding: 12px 14px 14px;
+      border-top: 1px solid #eef3f0;
+    }
+
+    .product-info h2 {
+      margin: 0 0 4px;
+      font-size: 17px;
+      line-height: 1.35;
+    }
+
+    .formula {
+      min-height: 20px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .price {
+      margin: 10px 0 12px;
+      color: var(--amber);
+      font-weight: 700;
+    }
+
+    .order-btn, .primary-btn {
+      width: 100%;
+      min-height: 42px;
+      border-radius: 7px;
+      background: var(--green);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .order-btn:hover, .primary-btn:hover { background: var(--green-dark); }
+
+    .product-actions {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .share-btn {
+      min-width: 46px;
+      height: 42px;
+      border: 1px solid rgba(8, 122, 47, .35);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--green);
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .share-btn:hover {
+      background: #edf8ef;
+    }
+
+    .secondary-btn {
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .ghost-btn {
+      min-height: 40px;
+      padding: 0 16px;
+      border: 1px solid rgba(8, 122, 47, .45);
+      border-radius: 7px;
+      background: #fff;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      background: rgba(15, 22, 18, .48);
+    }
+
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      width: min(980px, 100%);
+      max-height: min(92vh, 940px);
+      overflow: auto;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 18px 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .close-btn {
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      background: transparent;
+      color: var(--muted);
+      font-size: 27px;
+      line-height: 1;
+    }
+
+    body.product-link-mode .close-btn {
+      display: none;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      padding: 16px 22px 0;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #9aa39e;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    .step::after {
+      content: "";
+      height: 1px;
+      flex: 1;
+      background: var(--line);
+    }
+
+    .step:last-child::after { display: none; }
+
+    .step-num {
+      display: grid;
+      place-items: center;
+      width: 28px;
+      height: 28px;
+      flex: 0 0 28px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .step.active { color: var(--green); font-weight: 700; }
+    .step.active .step-num { background: var(--green); border-color: var(--green); color: #fff; }
+    .step.done { color: var(--green); }
+    .step.done .step-num { background: var(--green); border-color: var(--green); color: #fff; }
+
+    .modal-body {
+      padding: 22px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: block; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(240px, 360px);
+      gap: 22px;
+      align-items: start;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      color: var(--text);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    .field input {
+      width: 100%;
+      min-height: 44px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      outline: none;
+      background: #fff;
+    }
+
+    .field input:focus {
+      border-color: var(--green);
+      box-shadow: 0 0 0 3px rgba(8, 122, 47, .10);
+    }
+
+    .gps-box {
+      display: grid;
+      gap: 12px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--soft);
+    }
+
+    .gps-map {
+      min-height: 118px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #d7e0dc;
+      border-radius: 8px;
+      color: var(--green);
+      background:
+        linear-gradient(90deg, rgba(8, 122, 47, .08) 1px, transparent 1px),
+        linear-gradient(rgba(8, 122, 47, .08) 1px, transparent 1px),
+        #fff;
+      background-size: 28px 28px;
+      text-align: center;
+      padding: 14px;
+    }
+
+    .hidden-gps {
+      display: none;
+    }
+
+    .selected-product, .summary-card, .rules-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .selected-product {
+      display: grid;
+      grid-template-columns: 96px 1fr;
+      gap: 14px;
+      padding: 13px;
+    }
+
+    .selected-product img {
+      width: 96px;
+      height: 106px;
+      object-fit: contain;
+      border-radius: 7px;
+      background: #fbfdfb;
+    }
+
+    .selected-product h3 {
+      margin: 2px 0 4px;
+      font-size: 18px;
+    }
+
+    .qty-row {
+      display: grid;
+      grid-template-columns: 44px minmax(70px, 1fr) 44px auto;
+      align-items: center;
+      max-width: 360px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .qty-row button {
+      height: 44px;
+      background: #f8faf8;
+      color: var(--green);
+      font-size: 24px;
+    }
+
+    .qty-row input {
+      height: 44px;
+      border: 0;
+      border-left: 1px solid var(--line);
+      border-right: 1px solid var(--line);
+      text-align: center;
+      outline: none;
+    }
+
+    .qty-unit {
+      padding: 0 13px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .rules-card {
+      margin-top: 16px;
+      padding: 14px;
+      background: #fffdf8;
+      border-color: #f2dcc0;
+    }
+
+    .rules-card h4, .summary-card h4 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .rules-card ul {
+      margin: 0;
+      padding-left: 20px;
+      color: #445249;
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .summary-card {
+      padding: 16px;
+    }
+
+    .line {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 9px 0;
+      border-bottom: 1px solid #eef3f0;
+    }
+
+    .line:last-child { border-bottom: 0; }
+    .line strong { text-align: right; }
+    .discount strong { color: var(--red); }
+    .total strong { color: var(--green); font-size: 21px; }
+
+    .summary-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.05fr;
+      gap: 18px;
+    }
+
+    .info-panel {
+      min-width: 0;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .info-panel h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .info-row {
+      display: grid;
+      grid-template-columns: 92px 1fr;
+      gap: 8px;
+      margin: 9px 0;
+      color: var(--muted);
+    }
+
+    .info-row strong {
+      color: var(--text);
+      font-weight: 600;
+      overflow-wrap: anywhere;
+    }
+
+    .qr-img {
+      display: block;
+      width: min(190px, 100%);
+      margin: 12px auto 4px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 8px;
+      background: #fff;
+    }
+
+    .actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-top: 22px;
+    }
+
+    .actions .primary-btn {
+      width: auto;
+      min-width: 130px;
+      padding: 0 22px;
+    }
+
+    .notice {
+      margin-top: 18px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      background: #edf8ef;
+      color: var(--green);
+      font-weight: 700;
+    }
+
+    .error {
+      min-height: 20px;
+      color: var(--red);
+      font-size: 13px;
+    }
+
+    @media (max-width: 1050px) {
+      .product-grid { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
+    }
+
+    @media (max-width: 900px) {
+      .summary-layout { grid-template-columns: 1fr 1fr; }
+      .summary-layout .payment-panel { grid-column: span 2; }
+    }
+
+    @media (max-width: 720px) {
+      .app-header {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .cart-chip { width: 100%; justify-content: space-between; }
+      .toolbar { grid-template-columns: 1fr; }
+      .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+      .product-info { padding: 10px; }
+      .product-info h2 { font-size: 15px; }
+      .price, .formula { font-size: 13px; }
+      .modal-backdrop { padding: 0; align-items: stretch; }
+      .modal { width: 100%; max-height: 100vh; border-radius: 0; }
+      .steps { grid-template-columns: 1fr; gap: 8px; }
+      .step::after { display: none; }
+      .form-grid, .summary-layout { grid-template-columns: 1fr; }
+      .summary-layout .payment-panel { grid-column: auto; }
+      .selected-product { grid-template-columns: 78px 1fr; }
+      .selected-product img { width: 78px; height: 88px; }
+      .actions { flex-direction: column-reverse; }
+      .actions .primary-btn, .secondary-btn { width: 100%; }
+    }
+
+    @media (max-width: 560px) {
+      main { padding-left: 10px; padding-right: 10px; }
+      .product-grid { grid-template-columns: 1fr; }
+      .modal-header, .modal-body, .steps { padding-left: 14px; padding-right: 14px; }
+      .brand h1 { font-size: 28px; }
+      .qty-row { grid-template-columns: 42px minmax(54px, 1fr) 42px auto; }
+      .qty-unit { padding: 0 9px; }
+      .info-row { grid-template-columns: 76px 1fr; }
+    }
+
+    /* Modern light theme */
+    :root {
+      --green: #0f8a3b;
+      --green-dark: #086b2d;
+      --green-soft: #eaf7ee;
+      --amber: #d97805;
+      --red: #d92d20;
+      --text: #15221a;
+      --muted: #64736a;
+      --line: #e4ece7;
+      --soft: #f5faf7;
+      --white: #ffffff;
+      --shadow: 0 24px 70px rgba(20, 35, 28, .14);
+      --radius: 8px;
+    }
+
+    html {
+      background: #ffffff;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        linear-gradient(180deg, #ffffff 0%, #f7fbf8 48%, #ffffff 100%);
+      color: var(--text);
+    }
+
+    .app-header {
+      padding: 14px clamp(16px, 4vw, 56px);
+      background: rgba(255, 255, 255, .88);
+      border-bottom: 1px solid rgba(228, 236, 231, .88);
+      box-shadow: 0 10px 32px rgba(22, 41, 29, .05);
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, #0f8a3b, #21a55a);
+      box-shadow: 0 12px 24px rgba(15, 138, 59, .22);
+      font-size: 0;
+      position: relative;
+    }
+
+    .brand-mark::before {
+      content: "";
+      width: 18px;
+      height: 24px;
+      border: 3px solid #fff;
+      border-left: 0;
+      border-bottom: 0;
+      border-radius: 0 16px 0 16px;
+      transform: rotate(45deg);
+    }
+
+    .brand h1 {
+      color: #16351f;
+      font-size: clamp(24px, 3vw, 34px);
+      letter-spacing: 0;
+    }
+
+    .cart-chip {
+      min-height: 42px;
+      padding: 9px 14px;
+      border-color: rgba(15, 138, 59, .18);
+      background: #f4fbf6;
+      color: #31543b;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .9);
+    }
+
+    .cart-chip strong {
+      display: grid;
+      place-items: center;
+      min-width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      background: var(--green);
+      color: #fff;
+    }
+
+    main {
+      max-width: 1420px;
+      margin: 0 auto;
+      padding: 26px clamp(14px, 4vw, 56px) 56px;
+    }
+
+    .toolbar {
+      grid-template-columns: minmax(170px, 220px) minmax(240px, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .94);
+      box-shadow: 0 18px 44px rgba(23, 47, 30, .06);
+    }
+
+    .menu-btn, .select-btn, .search-box {
+      min-height: 46px;
+      border-radius: var(--radius);
+      border-color: transparent;
+      box-shadow: none;
+    }
+
+    .menu-btn {
+      background: var(--green);
+      color: #fff;
+      box-shadow: 0 10px 22px rgba(15, 138, 59, .22);
+    }
+
+    select.menu-btn {
+      background-image:
+        linear-gradient(45deg, transparent 50%, #fff 50%),
+        linear-gradient(135deg, #fff 50%, transparent 50%);
+      background-position:
+        calc(100% - 18px) 19px,
+        calc(100% - 12px) 19px;
+      background-size: 6px 6px, 6px 6px;
+      background-repeat: no-repeat;
+      padding-right: 34px;
+    }
+
+    .search-box {
+      background: #f6faf8;
+      border: 1px solid transparent;
+      font-size: 15px;
+    }
+
+    .search-box:focus {
+      background: #fff;
+      border-color: rgba(15, 138, 59, .38);
+      box-shadow: 0 0 0 4px rgba(15, 138, 59, .10);
+    }
+
+    .select-btn {
+      min-width: 142px;
+      background: #f8fbf9;
+      color: #486154;
+      text-align: center;
+    }
+
+    .status-box {
+      margin: 0 0 20px;
+      padding: 13px 16px;
+      border-radius: var(--radius);
+      border-color: rgba(15, 138, 59, .16);
+      background: #f6fbf7;
+      color: #42604c;
+    }
+
+    .product-grid {
+      grid-template-columns: repeat(auto-fill, minmax(188px, 1fr));
+      gap: 18px;
+    }
+
+    .product-card {
+      border-radius: var(--radius);
+      border-color: rgba(219, 230, 224, .9);
+      background: #fff;
+      box-shadow: 0 12px 30px rgba(25, 45, 31, .06);
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(15, 138, 59, .34);
+      box-shadow: 0 22px 44px rgba(25, 45, 31, .12);
+    }
+
+    .product-image-btn {
+      background: #fbfdfb;
+    }
+
+    .product-card img {
+      aspect-ratio: 1 / 1.05;
+      padding: 16px;
+      background:
+        radial-gradient(circle at 50% 35%, #ffffff 0%, #ffffff 46%, #f4faf6 100%);
+    }
+
+    .product-info {
+      padding: 14px;
+      border-top: 1px solid #edf3ef;
+    }
+
+    .product-info h2 {
+      min-height: 46px;
+      font-size: 16px;
+      line-height: 1.42;
+      color: #19281e;
+    }
+
+    .formula {
+      color: #6d7d72;
+    }
+
+    .price {
+      color: #b96104;
+      font-size: 18px;
+    }
+
+    .order-btn, .primary-btn {
+      min-height: 44px;
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #139245, #0b7b33);
+      box-shadow: 0 12px 22px rgba(15, 138, 59, .20);
+      transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+    }
+
+    .order-btn:hover, .primary-btn:hover {
+      background: linear-gradient(180deg, #0f863d, #076a2c);
+      transform: translateY(-1px);
+      box-shadow: 0 16px 28px rgba(15, 138, 59, .24);
+    }
+
+    .share-btn, .secondary-btn, .ghost-btn {
+      border-radius: var(--radius);
+      transition: background .16s ease, border-color .16s ease, transform .16s ease;
+    }
+
+    .share-btn {
+      border-color: rgba(15, 138, 59, .20);
+      background: #f7fbf8;
+      color: var(--green);
+    }
+
+    .share-btn:hover,
+    .ghost-btn:hover,
+    .secondary-btn:hover {
+      transform: translateY(-1px);
+      background: var(--green-soft);
+      border-color: rgba(15, 138, 59, .35);
+    }
+
+    .modal-backdrop {
+      background: rgba(18, 31, 23, .36);
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+    }
+
+    .modal {
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 255, 255, .8);
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      background: linear-gradient(180deg, #ffffff, #fbfdfb);
+    }
+
+    .modal-header h2 {
+      color: #17351f;
+      font-size: 24px;
+    }
+
+    .close-btn {
+      border-radius: var(--radius);
+      background: #f5f8f6;
+    }
+
+    .close-btn:hover {
+      background: #eef5f0;
+      color: var(--green-dark);
+    }
+
+    .steps {
+      padding-top: 18px;
+    }
+
+    .step-num {
+      border-color: #dce8e1;
+      background: #f9fbfa;
+    }
+
+    .step.active .step-num,
+    .step.done .step-num {
+      box-shadow: 0 8px 18px rgba(15, 138, 59, .20);
+    }
+
+    .field label,
+    .rules-card h4,
+    .summary-card h4,
+    .info-panel h3 {
+      color: #19351f;
+    }
+
+    .field input {
+      min-height: 48px;
+      border-radius: var(--radius);
+      background: #fbfdfc;
+    }
+
+    .field input:focus {
+      background: #fff;
+      border-color: rgba(15, 138, 59, .50);
+      box-shadow: 0 0 0 4px rgba(15, 138, 59, .10);
+    }
+
+    .selected-product,
+    .summary-card,
+    .rules-card,
+    .info-panel {
+      border-radius: var(--radius);
+      border-color: var(--line);
+      box-shadow: 0 12px 26px rgba(25, 45, 31, .05);
+    }
+
+    .selected-product img {
+      border: 1px solid #eef4f0;
+      background: #f8fbf9;
+    }
+
+    .rules-card {
+      background: #fffaf1;
+      border-color: #f0dfbf;
+      box-shadow: none;
+    }
+
+    .qty-row {
+      max-width: 390px;
+      border-radius: var(--radius);
+      box-shadow: 0 10px 24px rgba(25, 45, 31, .05);
+    }
+
+    .qty-row button {
+      background: #f4faf6;
+    }
+
+    .qty-row button:hover {
+      background: var(--green-soft);
+    }
+
+    .line {
+      border-bottom-color: #edf3ef;
+    }
+
+    .total strong {
+      color: var(--green-dark);
+      font-size: 23px;
+    }
+
+    .qr-img {
+      width: min(220px, 100%);
+      padding: 10px;
+      border-radius: var(--radius);
+      box-shadow: 0 14px 28px rgba(25, 45, 31, .08);
+    }
+
+    .notice {
+      border: 1px solid rgba(15, 138, 59, .18);
+      background: #f0f9f3;
+      color: #0b6f2e;
+    }
+
+    @media (max-width: 720px) {
+      .app-header {
+        gap: 12px;
+      }
+
+      main {
+        padding-top: 16px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+        padding: 8px;
+      }
+
+      .product-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      .product-info h2 {
+        min-height: 40px;
+      }
+
+      .modal {
+        border-radius: 0;
+      }
+    }
+
+    @media (max-width: 560px) {
+      main {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+      .brand h1 {
+        font-size: 25px;
+      }
+
+      .brand-mark {
+        width: 38px;
+        height: 38px;
+      }
+
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">✓</div>
+      <h1>สั่งปุ๋ยสูตร</h1>
+    </div>
+    <div class="cart-chip" aria-live="polite">
+      <span>รายการสั่งซื้อ</span>
+      <strong id="cartCount">0</strong>
+    </div>
+  </header>
+
+  <main>
+    <section class="toolbar" aria-label="เครื่องมือค้นหา">
+      <select class="menu-btn" id="sheetFilter" aria-label="เลือกหมวดสินค้า">
+        <option value="all">หมวดปุ๋ยทั้งหมด</option>
+      </select>
+      <input class="search-box" id="searchInput" type="search" placeholder="ค้นหาปุ๋ยสูตร เช่น 15-15-15, 46-0-0">
+      <button class="select-btn" type="button">เรียง: แนะนำ</button>
+    </section>
+
+    <div class="status-box" id="loadStatus">กำลังดึงสินค้าจาก Google Sheet...</div>
+    <section class="product-grid" id="productGrid" aria-label="รายการปุ๋ยสูตร"></section>
+  </main>
+
+  <div class="modal-backdrop" id="orderModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <header class="modal-header">
+        <h2 id="modalTitle">สั่งซื้อปุ๋ย</h2>
+        <button class="close-btn" id="closeModal" type="button" aria-label="ปิด">×</button>
+      </header>
+
+      <div class="steps" aria-label="ขั้นตอนการสั่งซื้อ">
+        <div class="step active" data-step-label="1"><span class="step-num">1</span><span>ข้อมูลผู้รับ</span></div>
+        <div class="step" data-step-label="2"><span class="step-num">2</span><span>จำนวนสั่งซื้อ</span></div>
+        <div class="step" data-step-label="3"><span class="step-num">3</span><span>ยืนยันการสั่งซื้อ</span></div>
+      </div>
+
+      <div class="modal-body">
+        <section class="screen active" data-screen="1">
+          <div class="form-grid">
+            <div>
+              <div class="field">
+                <label for="customerName">ชื่อผู้รับสินค้า</label>
+                <input id="customerName" autocomplete="name" pattern="[ก-๙\\s]+" placeholder="กรอกชื่อภาษาไทย">
+              </div>
+              <div class="field">
+                <label for="customerPhone">เบอร์โทร</label>
+                <input id="customerPhone" inputmode="numeric" autocomplete="tel" maxlength="10" pattern="[0-9]{10}" placeholder="กรอกเบอร์โทร 10 หลัก">
+              </div>
+              <div class="gps-box hidden-gps" aria-live="polite" aria-hidden="true">
+                <div class="gps-map" id="gpsText">ยังไม่ได้ระบุตำแหน่ง</div>
+                <button class="ghost-btn" id="gpsBtn" type="button" tabindex="-1">ใช้ตำแหน่งปัจจุบัน</button>
+              </div>
+              <div class="error" id="step1Error"></div>
+            </div>
+            <aside class="summary-card">
+              <h4>สินค้าที่เลือก</h4>
+              <div class="selected-product" id="selectedPreview1"></div>
+            </aside>
+          </div>
+          <div class="actions">
+            <button class="primary-btn" id="nextToQty" type="button">ถัดไป</button>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="2">
+          <div class="form-grid">
+            <div>
+              <div class="selected-product" id="selectedPreview2"></div>
+              <h3>จำนวนกระสอบ</h3>
+              <div class="qty-row">
+                <button id="minusQty" type="button" aria-label="ลดจำนวน">−</button>
+                <input id="quantityInput" type="number" min="1" step="1" value="1" inputmode="numeric">
+                <button id="plusQty" type="button" aria-label="เพิ่มจำนวน">+</button>
+                <span class="qty-unit">กระสอบ</span>
+              </div>
+              <div class="rules-card">
+                <h4>เงื่อนไขส่วนลด</h4>
+                <ul>
+                  <li>สั่งครบทุก 10 กระสอบ ลด 5 บาท</li>
+                  <li>สั่งครบทุก 20 กระสอบ ลด 10 บาท</li>
+                  <li>สั่งครบทุก 30 กระสอบ ลด 15 บาท</li>
+                  <li>สั่งครบทุก 40 กระสอบ ลด 20 บาท</li>
+                </ul>
+              </div>
+            </div>
+            <aside class="summary-card">
+              <h4>สรุปยอดสั่งซื้อ</h4>
+              <div id="priceSummary"></div>
+            </aside>
+          </div>
+          <div class="actions">
+            <button class="secondary-btn" id="backToInfo" type="button">ย้อนกลับ</button>
+            <button class="primary-btn" id="nextToConfirm" type="button">ถัดไป</button>
+          </div>
+        </section>
+
+        <section class="screen" data-screen="3">
+          <div class="summary-layout">
+            <div class="info-panel">
+              <h3>ข้อมูลผู้รับสินค้า</h3>
+              <div class="info-row"><span>ชื่อ</span><strong id="confirmName"></strong></div>
+              <div class="info-row"><span>เบอร์โทร</span><strong id="confirmPhone"></strong></div>
+              <div class="info-row"><span>ตำแหน่ง GPS</span><strong id="confirmGps"></strong></div>
+            </div>
+            <div class="info-panel">
+              <h3>สินค้าและยอดรวม</h3>
+              <div class="selected-product" id="selectedPreview3"></div>
+              <div id="confirmSummary"></div>
+            </div>
+            <div class="info-panel payment-panel">
+              <h3>ชำระเงิน</h3>
+              <div class="info-row"><span>ธนาคาร</span><strong>ธ.กสิกรไทย</strong></div>
+              <div class="info-row"><span>เลขบัญชี</span><strong>209-8-87489-8</strong></div>
+              <div class="info-row"><span>ชื่อบัญชี</span><strong>แหลมทองกิจเกษตร</strong></div>
+              <img
+                class="qr-img"
+                src="https://drive.google.com/thumbnail?id=1c3HjRsOyTZ-S4lAzbLlzPajW6Zw9cXRX&sz=w600"
+                alt="QR สำหรับชำระเงิน"
+                referrerpolicy="no-referrer"
+                data-fallback-src="https://drive.google.com/uc?export=view&id=1c3HjRsOyTZ-S4lAzbLlzPajW6Zw9cXRX"
+                data-local-fallback-src="assets/QR_Code-1779930204837.png"
+                onerror="if(!this.dataset.fallbackUsed){this.dataset.fallbackUsed='1';this.src=this.dataset.fallbackSrc;}else if(!this.dataset.localFallbackUsed){this.dataset.localFallbackUsed='1';this.src=this.dataset.localFallbackSrc;}else{this.onerror=null;}">
+            </div>
+          </div>
+          <div class="notice">หลังชำระเงินแล้ว กรุณาแนบสลิปการโอนเงินในแชทรายการสั่งซื้อ</div>
+          <div class="actions">
+            <button class="secondary-btn" id="backToQty" type="button">ย้อนกลับ</button>
+            <button class="primary-btn" id="finishOrder" type="button">เสร็จสิ้น</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SHEET_ID = "166Ija7H3Dal4qA4ZokEJVEBXGY1BhW1DWb1pIXw_OgI";
+    const ORDER_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby2oywx_DIc6Bc0SJHegaTtFqCnDSEuNx0y9hM_7PKR5k7uVxxqyuY2Vz8fjXRtvybbLg/exec";
+    const SHEET_NAMES = [
+      "แม่ปุ๋ย",
+      "ปุ๋ยปาล์ม",
+      "ปุ๋ยยาง",
+      "ปุ๋ยทุเรียน",
+      "ปุ๋ยอินทรีย์",
+      "ปุ๋ยอินทรีย์เคมี",
+      "ปุ๋ยเสมอ"
+    ];
+    let products = [];
+
+    const state = {
+      selected: null,
+      step: 1,
+      gps: "",
+      orderCount: 0,
+      productLinkMode: false
+    };
+
+    const grid = document.getElementById("productGrid");
+    const modal = document.getElementById("orderModal");
+    const searchInput = document.getElementById("searchInput");
+    const sheetFilter = document.getElementById("sheetFilter");
+    const loadStatus = document.getElementById("loadStatus");
+    const quantityInput = document.getElementById("quantityInput");
+
+    function money(value) {
+      return value.toLocaleString("th-TH") + " บาท";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function getCellValue(row, index) {
+      const cell = row.c && row.c[index];
+      if (!cell) return "";
+      return String(cell.v ?? cell.f ?? "").trim();
+    }
+
+    function parsePrice(value) {
+      const numeric = Number(String(value).replace(/[^\d.]/g, ""));
+      return Number.isFinite(numeric) ? numeric : 0;
+    }
+
+    function normalizeImageUrl(url) {
+      const raw = String(url || "").trim();
+      const driveMatch = raw.match(/drive\.google\.com\/file\/d\/([^/]+)/) || raw.match(/[?&]id=([^&]+)/);
+      if (driveMatch) {
+        return `https://drive.google.com/thumbnail?id=${encodeURIComponent(driveMatch[1])}&sz=w900`;
+      }
+      return raw;
+    }
+
+    function makeProductId(sheetName, rowNumber, name) {
+      return `${sheetName}|${rowNumber}|${name}`;
+    }
+
+    function getProductLink(product) {
+      const url = new URL(window.location.href);
+      url.searchParams.set("product", product.id);
+      return url.toString();
+    }
+
+    function getLinkedProductId() {
+      return new URLSearchParams(window.location.search).get("product");
+    }
+
+    async function copyProductLink(product) {
+      const link = getProductLink(product);
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = link;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        textArea.remove();
+      }
+      setStatus(`คัดลอกลิงก์สินค้าแล้ว: ${product.name}`);
+      window.setTimeout(() => setStatus(""), 2200);
+    }
+
+    function openSharedProductIfNeeded() {
+      const productId = getLinkedProductId();
+      if (!productId) return;
+      const product = products.find((item) => item.id === productId);
+      if (!product) {
+        setStatus("ไม่พบสินค้าจากลิงก์นี้ อาจถูกลบหรือแก้ไขใน Google Sheet", true);
+        return;
+      }
+      state.productLinkMode = true;
+      document.body.classList.add("product-link-mode");
+      sheetFilter.value = product.sheetName;
+      searchInput.value = "";
+      renderProducts([product]);
+      openOrder(product);
+    }
+
+    function setStatus(message, isError = false) {
+      loadStatus.textContent = message;
+      loadStatus.classList.toggle("error-state", isError);
+      loadStatus.style.display = message ? "block" : "none";
+    }
+
+    function calculate(product, qty) {
+      const quantity = Math.max(1, Number(qty) || 1);
+      const subtotal = product.price * quantity;
+      const discount = Math.floor(quantity / 10) * 5;
+      return { quantity, subtotal, discount, total: Math.max(0, subtotal - discount) };
+    }
+
+    function productMarkup(product) {
+      return `
+        <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='assets/no-image.svg';">
+        <div>
+          <h3>${escapeHtml(product.name)}</h3>
+          <div class="formula">${escapeHtml(product.formula)}</div>
+          <div class="price">${money(product.price)} / กระสอบ</div>
+        </div>
+      `;
+    }
+
+    function renderProducts(list = products) {
+      if (!list.length) {
+        grid.innerHTML = "";
+        setStatus(products.length ? "ไม่พบสินค้าตามคำค้นหา/หมวดที่เลือก" : "ไม่พบแถวสินค้าที่มีข้อมูลครบทั้ง ชื่อสินค้า, ราคา และ URL รูปภาพ", !products.length);
+        return;
+      }
+      setStatus("");
+      grid.innerHTML = list.map((product, index) => `
+        <article class="product-card">
+          <button class="product-image-btn" type="button" data-index="${index}" aria-label="สั่งซื้อ ${escapeHtml(product.name)}">
+            <img src="${escapeHtml(product.image)}" alt="${escapeHtml(product.name)}" decoding="async" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='assets/no-image.svg';">
+          </button>
+          <div class="product-info">
+            <h2>${escapeHtml(product.name)}</h2>
+            <div class="formula">${escapeHtml(product.formula)}</div>
+            <div class="price">${money(product.price)} / กระสอบ</div>
+            <div class="product-actions">
+              <button class="order-btn" type="button" data-index="${index}">สั่งซื้อ</button>
+              <button class="share-btn" type="button" data-share-index="${index}" title="คัดลอกลิงก์สินค้า" aria-label="คัดลอกลิงก์ ${escapeHtml(product.name)}">↗</button>
+            </div>
+          </div>
+        </article>
+      `).join("");
+
+      grid.querySelectorAll("[data-index]").forEach((button) => {
+        button.addEventListener("click", () => openOrder(list[Number(button.dataset.index)]));
+      });
+      grid.querySelectorAll("[data-share-index]").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          copyProductLink(list[Number(button.dataset.shareIndex)]);
+        });
+      });
+    }
+
+    function fetchSheetRows(sheetName) {
+      return new Promise((resolve, reject) => {
+        const callbackName = `sheetCallback_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+        const script = document.createElement("script");
+        const params = new URLSearchParams({
+          tqx: `out:json;responseHandler:${callbackName}`,
+          tq: "select A,C,E",
+          sheet: sheetName,
+          headers: "1"
+        });
+        script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?${params.toString()}`;
+        script.onerror = () => {
+          cleanup();
+          reject(new Error(`โหลดชีต ${sheetName} ไม่สำเร็จ`));
+        };
+        const timeout = window.setTimeout(() => {
+          cleanup();
+          reject(new Error(`โหลดชีต ${sheetName} เกินเวลา`));
+        }, 15000);
+
+        function cleanup() {
+          window.clearTimeout(timeout);
+          delete window[callbackName];
+          script.remove();
+        }
+
+        window[callbackName] = (data) => {
+          cleanup();
+          if (data.status === "error") {
+            reject(new Error(data.errors?.[0]?.detailed_message || `อ่านชีต ${sheetName} ไม่สำเร็จ`));
+            return;
+          }
+          const rows = data.table?.rows || [];
+          resolve(rows.map((row, index) => {
+            const rowNumber = index + 2;
+            const name = getCellValue(row, 0);
+            const price = parsePrice(getCellValue(row, 1));
+            const image = normalizeImageUrl(getCellValue(row, 2));
+            return { id: makeProductId(sheetName, rowNumber, name), name, price, image, formula: sheetName, sheetName, rowNumber };
+          }).filter((item) => item.name && item.price > 0 && item.image));
+        };
+
+        document.head.appendChild(script);
+      });
+    }
+
+    async function loadProductsFromSheets() {
+      setStatus("กำลังดึงสินค้าจาก Google Sheet...");
+      sheetFilter.innerHTML = `<option value="all">หมวดปุ๋ยทั้งหมด</option>`;
+      SHEET_NAMES.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        sheetFilter.appendChild(option);
+      });
+
+      const settled = await Promise.allSettled(SHEET_NAMES.map(fetchSheetRows));
+      products = settled.flatMap((result) => result.status === "fulfilled" ? result.value : []);
+      const failed = settled
+        .map((result, index) => result.status === "rejected" ? SHEET_NAMES[index] : "")
+        .filter(Boolean);
+
+      if (!products.length) {
+        const extra = failed.length ? ` อ่านไม่ได้: ${failed.join(", ")}` : "";
+        setStatus(`ไม่พบสินค้าจาก Google Sheet หรือชีตยังไม่ได้เปิดสิทธิ์ให้เว็บอ่านได้${extra}`, true);
+        renderProducts([]);
+        return;
+      }
+
+      setStatus(failed.length ? `โหลดสินค้าได้ ${products.length} รายการ แต่บางชีตอ่านไม่ได้: ${failed.join(", ")}` : "");
+      applyFilters();
+      openSharedProductIfNeeded();
+    }
+
+    function applyFilters() {
+      const linkedProductId = getLinkedProductId();
+      if (state.productLinkMode && linkedProductId) {
+        const linkedProduct = products.find((item) => item.id === linkedProductId);
+        renderProducts(linkedProduct ? [linkedProduct] : []);
+        return;
+      }
+      const query = searchInput.value.trim().toLowerCase();
+      const selectedSheet = sheetFilter.value;
+      const filtered = products.filter((product) => {
+        const matchSheet = selectedSheet === "all" || product.sheetName === selectedSheet;
+        const matchQuery = `${product.name} ${product.formula}`.toLowerCase().includes(query);
+        return matchSheet && matchQuery;
+      });
+      renderProducts(filtered);
+    }
+
+    function openOrder(product) {
+      state.selected = product;
+      state.step = 1;
+      state.gps = "";
+      quantityInput.value = "1";
+      document.getElementById("step1Error").textContent = "";
+      document.getElementById("gpsText").textContent = "กำลังขอตำแหน่ง...";
+      renderSelected();
+      renderPriceSummary();
+      showStep(1);
+      modal.classList.add("open");
+      document.getElementById("customerName").focus();
+      requestCurrentLocation();
+    }
+
+    function closeOrder() {
+      if (state.productLinkMode) return;
+      modal.classList.remove("open");
+    }
+
+    function showStep(step) {
+      state.step = step;
+      document.querySelectorAll(".screen").forEach((screen) => {
+        screen.classList.toggle("active", Number(screen.dataset.screen) === step);
+      });
+      document.querySelectorAll(".step").forEach((item) => {
+        const itemStep = Number(item.dataset.stepLabel);
+        item.classList.toggle("active", itemStep === step);
+        item.classList.toggle("done", itemStep < step);
+      });
+      if (step === 3) renderConfirm();
+    }
+
+    function renderSelected() {
+      ["selectedPreview1", "selectedPreview2", "selectedPreview3"].forEach((id) => {
+        document.getElementById(id).innerHTML = productMarkup(state.selected);
+      });
+    }
+
+    function renderPriceSummary(targetId = "priceSummary") {
+      const totals = calculate(state.selected, quantityInput.value);
+      const perTen = Math.floor(totals.quantity / 10);
+      const discountLine = totals.discount > 0
+        ? `<div class="line discount"><span>ส่วนลด (${perTen} ชุด x 5 บาท)</span><strong>-${money(totals.discount)}</strong></div>`
+        : "";
+      document.getElementById(targetId).innerHTML = `
+        <div class="line"><span>ราคาต่อกระสอบ</span><strong>${money(state.selected.price)}</strong></div>
+        <div class="line"><span>จำนวน</span><strong>${totals.quantity} กระสอบ</strong></div>
+        <div class="line"><span>ราคารวม</span><strong>${money(totals.subtotal)}</strong></div>
+        ${discountLine}
+        <div class="line total"><span>ยอดรวมสุทธิ</span><strong>${money(totals.total)}</strong></div>
+      `;
+    }
+
+    function validateStep1() {
+      const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
+      const error = document.getElementById("step1Error");
+      if (!name || !phone) {
+        error.textContent = "กรุณากรอกชื่อและเบอร์โทรก่อนกดถัดไป";
+        return false;
+      }
+      if (!/^[ก-๙\s]+$/.test(name)) {
+        error.textContent = "กรุณากรอกชื่อเป็นภาษาไทยเท่านั้น ห้ามใส่ตัวเลข";
+        return false;
+      }
+      if (!/^\d{10}$/.test(phone)) {
+        error.textContent = "กรุณากรอกเบอร์โทรเป็นตัวเลข 10 หลักเท่านั้น";
+        return false;
+      }
+      if (!state.gps) {
+        error.textContent = "กรุณาอนุญาตตำแหน่ง GPS ในเบราว์เซอร์ก่อนกดถัดไป";
+        return false;
+      }
+      error.textContent = "";
+      return true;
+    }
+
+    function renderConfirm() {
+      document.getElementById("confirmName").textContent = document.getElementById("customerName").value.trim();
+      document.getElementById("confirmPhone").textContent = document.getElementById("customerPhone").value.trim();
+      document.getElementById("confirmGps").innerHTML = state.gps
+        ? `<a href="https://www.google.com/maps?q=${encodeURIComponent(state.gps)}" target="_blank" rel="noreferrer">${state.gps}</a>`
+        : "ยังไม่ได้ระบุ";
+      renderPriceSummary("confirmSummary");
+    }
+
+    function getOrderData() {
+      const totals = calculate(state.selected, quantityInput.value);
+      const name = document.getElementById("customerName").value.trim();
+      const phone = document.getElementById("customerPhone").value.trim();
+      const mapUrl = `https://www.google.com/maps?q=${encodeURIComponent(state.gps)}`;
+      const now = new Date();
+      return {
+        orderId: `FZ-${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}-${String(now.getTime()).slice(-6)}`,
+        createdAt: now.toISOString(),
+        name,
+        phone,
+        gps: state.gps,
+        mapUrl,
+        productName: state.selected.name,
+        category: state.selected.sheetName,
+        productPrice: state.selected.price,
+        quantity: totals.quantity,
+        subtotal: totals.subtotal,
+        discount: totals.discount,
+        total: totals.total
+      };
+    }
+
+    async function sendOrderToBackend(order) {
+      if (!ORDER_WEB_APP_URL) {
+        throw new Error("ยังไม่ได้ตั้งค่า ORDER_WEB_APP_URL สำหรับส่ง Telegram และบันทึก Google Sheet");
+      }
+
+      await fetch(ORDER_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(order)
+      });
+    }
+
+    function requestCurrentLocation() {
+      const gpsText = document.getElementById("gpsText");
+      gpsText.textContent = "กำลังขอตำแหน่ง...";
+      if (!navigator.geolocation) {
+        gpsText.textContent = "เบราว์เซอร์นี้ไม่รองรับ GPS";
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude.toFixed(6);
+          const lng = position.coords.longitude.toFixed(6);
+          state.gps = `${lat}, ${lng}`;
+          gpsText.innerHTML = `ตำแหน่งปัจจุบัน<br><strong>${state.gps}</strong>`;
+          document.getElementById("step1Error").textContent = "";
+        },
+        () => {
+          gpsText.textContent = "ขอตำแหน่งไม่สำเร็จ กรุณาอนุญาต GPS ในเบราว์เซอร์";
+        },
+        { enableHighAccuracy: true, timeout: 12000, maximumAge: 0 }
+      );
+    }
+
+    document.getElementById("gpsBtn").addEventListener("click", requestCurrentLocation);
+    document.getElementById("customerName").addEventListener("input", (event) => {
+      event.target.value = event.target.value.replace(/[^ก-๙\s]/g, "");
+    });
+    document.getElementById("customerPhone").addEventListener("input", (event) => {
+      event.target.value = event.target.value.replace(/\D/g, "").slice(0, 10);
+    });
+
+    document.getElementById("nextToQty").addEventListener("click", () => {
+      if (validateStep1()) showStep(2);
+    });
+    document.getElementById("backToInfo").addEventListener("click", () => showStep(1));
+    document.getElementById("nextToConfirm").addEventListener("click", () => showStep(3));
+    document.getElementById("backToQty").addEventListener("click", () => showStep(2));
+    document.getElementById("finishOrder").addEventListener("click", async (event) => {
+      const button = event.currentTarget;
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = "กำลังส่งคำสั่งซื้อ...";
+      try {
+        await sendOrderToBackend(getOrderData());
+        state.orderCount += 1;
+        document.getElementById("cartCount").textContent = state.orderCount;
+        alert("ส่งคำสั่งซื้อเรียบร้อยแล้ว");
+        if (state.productLinkMode) {
+          modal.classList.remove("open");
+        } else {
+          closeOrder();
+        }
+      } catch (error) {
+        alert(error.message || "ส่งคำสั่งซื้อไม่สำเร็จ");
+      } finally {
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    });
+    document.getElementById("closeModal").addEventListener("click", closeOrder);
+    modal.addEventListener("click", (event) => {
+      if (event.target === modal) closeOrder();
+    });
+
+    document.getElementById("minusQty").addEventListener("click", () => {
+      quantityInput.value = Math.max(1, Number(quantityInput.value || 1) - 1);
+      renderPriceSummary();
+    });
+    document.getElementById("plusQty").addEventListener("click", () => {
+      quantityInput.value = Math.max(1, Number(quantityInput.value || 1) + 1);
+      renderPriceSummary();
+    });
+    quantityInput.addEventListener("input", () => {
+      if (Number(quantityInput.value) < 1) quantityInput.value = "1";
+      renderPriceSummary();
+    });
+
+    searchInput.addEventListener("input", applyFilters);
+    sheetFilter.addEventListener("change", applyFilters);
+
+    loadProductsFromSheets();
+  </script>
+</body>
+</html>

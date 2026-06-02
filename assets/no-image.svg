@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="500" height="600" viewBox="0 0 500 600" role="img" aria-label="ไม่มีรูปสินค้า">
+  <rect width="500" height="600" fill="#f6faf7"/>
+  <rect x="52" y="72" width="396" height="456" rx="18" fill="#ffffff" stroke="#dfe7e2" stroke-width="4"/>
+  <path d="M176 333c54-118 114-141 179-167-8 66-29 121-76 158-31 25-67 31-103 9Z" fill="#087a2f" opacity=".18"/>
+  <path d="M168 350c55-71 99-108 181-166" fill="none" stroke="#087a2f" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="174" cy="213" r="34" fill="#f28b00" opacity=".20"/>
+  <text x="250" y="424" text-anchor="middle" font-family="Tahoma, Arial, sans-serif" font-size="34" font-weight="700" fill="#087a2f">ไม่มีรูปสินค้า</text>
+</svg>
